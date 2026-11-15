@@ -1,4 +1,4 @@
-import { EXAMS, isExamKey, getCountdown, getExamEnd, createCalendar } from "./countdown.mjs";
+import { EXAMS, isExamKey, getCountdown, getExamEnd, createCalendar } from "./countdown.mjs?v=b6c1235d72";
 
 const $ = id => document.getElementById(id);
 const storageKey = "integrand.exam.116";

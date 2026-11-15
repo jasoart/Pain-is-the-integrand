@@ -5,21 +5,21 @@ export const EXAMS = Object.freeze({
     name: "116 學測・數學 A",
     start: "2027-01-22T09:20:00+08:00",
     durationMinutes: 100,
-    dateLabel: "2027 / 01 / 22（五）09:20",
-    period: "學測考期：01 / 22 — 01 / 24",
-    caption: "距離 116 學測數學 A 開考，還有",
+    subject: "學測數學 A",
   }),
   ast: Object.freeze({
     name: "116 分科測驗・數學甲",
     start: "2027-07-10T14:00:00+08:00",
     durationMinutes: 80,
-    dateLabel: "2027 / 07 / 10（六）14:00",
-    period: "分科考期：07 / 10 — 07 / 11",
-    caption: "距離 116 分科數學甲開考，還有",
+    subject: "分科數學甲",
   }),
 });
 
 export const isExamKey = key => Object.hasOwn(EXAMS, key);
+
+export function getExamEnd(exam) {
+  return Date.parse(exam.start) + exam.durationMinutes * 60_000;
+}
 
 export function getCountdown(target, now = Date.now()) {
   const timestamp = typeof target === "number" ? target : Date.parse(target);
@@ -35,12 +35,6 @@ export function getCountdown(target, now = Date.now()) {
     seconds: totalSeconds % 60,
     started: now >= timestamp,
   };
-}
-
-export function dayPhrase(countdown) {
-  if (countdown.started) return "接下來的每一天";
-  if (countdown.days === 0) return "學測前的最後不到 1 天";
-  return `學測前的最後 ${countdown.days} 天`;
 }
 
 const utcStamp = timestamp => new Date(timestamp).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
@@ -73,7 +67,7 @@ export function createCalendar(key, now = Date.now()) {
     `UID:116-${key}@pain-is-the-integrand.github.io`,
     `DTSTAMP:${utcStamp(now)}`,
     `DTSTART:${utcStamp(timestamp)}`,
-    `DTEND:${utcStamp(timestamp + exam.durationMinutes * 60000)}`,
+    `DTEND:${utcStamp(getExamEnd(exam))}`,
     `SUMMARY:${escapeText(exam.name)}`,
     `DESCRIPTION:${escapeText("時間依大考中心《116 學年度考試簡章》。請留意試場資訊，並於預備鈴響時入場。")}`,
     "URL:https://www.ceec.edu.tw/",

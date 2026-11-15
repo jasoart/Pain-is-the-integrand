@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { EXAMS, getCountdown, dayPhrase, isExamKey, createCalendar, foldLine } from "../assets/countdown.mjs";
+import { EXAMS, getCountdown, isExamKey, createCalendar, foldLine } from "../assets/countdown.mjs";
 
 const start = Date.parse(EXAMS.gsat.start);
 
@@ -19,24 +19,25 @@ test("one millisecond before start never shows an already-started state", () => 
   const value = getCountdown(start, start - 1);
   assert.equal(value.seconds, 1);
   assert.equal(value.started, false);
-  assert.equal(dayPhrase(value), "學測前的最後不到 1 天");
+  assert.equal(value.days, 0);
 });
 
-test("both exact start and past dates clamp to zero with appropriate copy", () => {
+test("both exact start and past dates clamp every timer unit to zero", () => {
   for (const now of [start, start + 1, start + 86400000]) {
     const value = getCountdown(start, now);
     assert.equal(value.started, true);
     assert.equal(value.totalSeconds, 0);
     assert.equal(value.days, 0);
-    assert.equal(dayPhrase(value), "接下來的每一天");
+    assert.deepEqual([value.hours, value.minutes, value.seconds], [0, 0, 0]);
   }
 });
 
-test("full-day boundary uses the same rounding in the headline and timer", () => {
+test("the last full day rolls over to 23:59:59", () => {
   const value = getCountdown(start, start - 86400000);
   assert.equal(value.days, 1);
   assert.equal(value.hours, 0);
-  assert.equal(dayPhrase(value), "學測前的最後 1 天");
+  const next = getCountdown(start, start - 86399000);
+  assert.deepEqual([next.days, next.hours, next.minutes, next.seconds], [0, 23, 59, 59]);
 });
 
 test("suspended tabs recalculate from elapsed time", () => {
